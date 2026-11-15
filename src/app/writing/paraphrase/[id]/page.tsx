@@ -35,6 +35,7 @@ export default async function ParaphrasePage({
           id: exercise.id,
           original: exercise.original,
           models: JSON.parse(exercise.models) as string[],
+          tips: JSON.parse(exercise.tips) as string[],
         }}
       />
       <AttemptHistory kind="paraphrase" refId={exercise.id} />

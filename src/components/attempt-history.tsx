@@ -23,7 +23,10 @@ function detailBits(detail: string | null): string[] {
     const bits: string[] = [];
     if (typeof d.plays === "number") bits.push(`played ${d.plays}×`);
     if (typeof d.words === "number") bits.push(`${d.words} words`);
+    if (typeof d.kept === "number") bits.push(`${d.kept} words kept`);
     if (d.recorded === true) bits.push("recorded");
+    if (d.assessment && typeof d.assessment === "object")
+      bits.push("self-checked");
     return bits;
   } catch {
     return [];

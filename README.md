@@ -4,15 +4,19 @@ An MVP IELTS practice web app for learners around band 5.5 aiming for 6.5–7.0.
 It prioritises active drills over passive content:
 
 - **Writing** — copy band-7 sample essays (Task 1 & 2) from memory and diff your
-  version word-by-word against the original; paraphrase sentences and compare
-  with model answers.
+  version word-by-word against the original; paraphrase sentences/paragraphs and
+  get a "what stayed the same" analysis (kept words, copied chunks, same-opening
+  warning) plus improvement tips and model answers; fix common mistakes: correct
+  a typical band-5 sentence and read why.
 - **Reading** — synonym finder (tap the word in the passage the question
   paraphrases) and paraphrase recognition (pick the option that keeps the
   meaning).
 - **Listening** — dictation: play a clip, type what you hear, see a highlighted
-  diff and an accuracy score.
-- **Speaking** — shadowing: play a model answer, record yourself with the
-  microphone, replay and compare.
+  diff and an accuracy score; listen & choose: hear a sentence and pick the
+  option that keeps its meaning.
+- **Speaking** — shadowing: play a model answer (whole or sentence-by-sentence),
+  record yourself, replay and compare, then rate Fluency / Pronunciation /
+  Lexical / Grammar on a self-check that is saved with the attempt.
 - **Dashboard** — progress: exercises done per module, drills today, recent
   activity, and the "band track" from 5.5 toward 7.0.
 
@@ -41,14 +45,16 @@ Reset content at any time with `npm run db:seed` (it clears attempts too).
 ```
 prisma/
   schema.prisma        # exercise tables + polymorphic Attempt log
-  seed.ts              # 6 essays, 6 paraphrases, 8 synonyms, 8 choices,
-                       # 6 dictation clips, 6 shadowing clips
+  seed.ts              # 6 essays, 8 paraphrases (sentence + paragraph level),
+                       # 8 error fixes, 8 synonyms, 8 choices, 6 dictation
+                       # clips, 6 listen & choose, 6 shadowing clips
 src/
   app/
     page.tsx                     # dashboard
     writing/                     # module list + copy/[id] + paraphrase/[id]
+                                 # + mistakes/[id] (fix common mistakes)
     reading/                     # module list + synonym/[id] + choice/[id]
-    listening/                   # module list + dictation/[id]
+    listening/                   # module list + dictation/[id] + choice/[id]
     speaking/                    # module list + shadowing/[id]
     api/attempts/route.ts        # POST an attempt
   components/
@@ -58,11 +64,12 @@ src/
     diff-view.tsx                # word-diff renderer
     exercise-list.tsx            # list rows with done/score state
     attempt-history.tsx          # per-exercise attempt log
-    practice/                    # the six drill UIs (client components)
+    practice/                    # the eight drill UIs (client components)
     ui/                          # shadcn/ui primitives
   lib/
     db.ts                        # Prisma client
     diff.ts                      # word-level LCS diff + accuracy
+    paraphrase-check.ts          # kept-word / copied-chunk / opening analysis
     practice.ts                  # progress queries, labels, next-up
     speech.ts                    # Web Speech API wrapper
     attempt.ts                   # client-side attempt recorder
@@ -72,7 +79,8 @@ src/
 
 - Attempts are written via `POST /api/attempts`; the dashboard and each detail
   page read them for progress and history.
-- `score` is 0–100 (diff accuracy, or 100/50/0 for right/late-right/revealed).
+- `score` is 0–100 (diff accuracy, paraphrase degree, self-check average, or
+  100/50/0 for right/late-right/revealed).
 - To use real audio: add a `audioUrl` field to `DictationClip`/`ShadowingClip`,
   serve files from `/public/audio`, and replace `speak()` calls.
 # Bandwork

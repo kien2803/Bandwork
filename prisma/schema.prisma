@@ -24,6 +24,7 @@ model ParaphraseExercise {
   id        Int      @id @default(autoincrement())
   original  String
   models    String // JSON array of model paraphrases
+  tips      String   @default("[]") // JSON array of improvement tips
   createdAt DateTime @default(now())
 }
 
@@ -41,6 +42,24 @@ model ParaphraseChoice {
   id        Int      @id @default(autoincrement())
   original  String
   options   String // JSON array of 3 options
+  correct   Int
+  createdAt DateTime @default(now())
+}
+
+model ErrorFix {
+  id          Int      @id @default(autoincrement())
+  mistake     String // short label, e.g. "word repetition"
+  flawed      String // a typical learner sentence containing the mistake
+  corrected   String // a corrected version
+  explanation String
+  createdAt   DateTime @default(now())
+}
+
+model ListenChoice {
+  id        Int      @id @default(autoincrement())
+  title     String
+  audio     String // the sentence spoken aloud
+  options   String // JSON array of 3 written paraphrases
   correct   Int
   createdAt DateTime @default(now())
 }

@@ -3,9 +3,11 @@ import { db } from "@/lib/db";
 export const KIND_MODULE = {
   copy: "writing",
   paraphrase: "writing",
+  errorfix: "writing",
   synonym: "reading",
   choice: "reading",
   dictation: "listening",
+  listenchoice: "listening",
   shadowing: "speaking",
 } as const;
 
@@ -15,16 +17,18 @@ export type Module = (typeof KIND_MODULE)[Kind];
 const MODULES: Module[] = ["writing", "reading", "listening", "speaking"];
 
 export async function getExerciseTotals() {
-  const [copy, paraphrase, synonym, choice, dictation, shadowing] =
+  const [copy, paraphrase, errorfix, synonym, choice, dictation, listenchoice, shadowing] =
     await Promise.all([
       db.sampleEssay.count(),
       db.paraphraseExercise.count(),
+      db.errorFix.count(),
       db.synonymExercise.count(),
       db.paraphraseChoice.count(),
       db.dictationClip.count(),
+      db.listenChoice.count(),
       db.shadowingClip.count(),
     ]);
-  return { copy, paraphrase, synonym, choice, dictation, shadowing };
+  return { copy, paraphrase, errorfix, synonym, choice, dictation, listenchoice, shadowing };
 }
 
 export async function getDoneRefIds(kind: Kind): Promise<Set<number>> {
@@ -62,9 +66,11 @@ export async function getProgress(): Promise<Progress> {
   const doneSets: Record<Kind, Set<number>> = {
     copy: new Set(),
     paraphrase: new Set(),
+    errorfix: new Set(),
     synonym: new Set(),
     choice: new Set(),
     dictation: new Set(),
+    listenchoice: new Set(),
     shadowing: new Set(),
   };
   let todayDrills = 0;
@@ -117,9 +123,11 @@ export function exerciseLabel(kind: Kind, item: {
 export const KIND_HREF: Record<Kind, (id: number) => string> = {
   copy: (id) => `/writing/copy/${id}`,
   paraphrase: (id) => `/writing/paraphrase/${id}`,
+  errorfix: (id) => `/writing/mistakes/${id}`,
   synonym: (id) => `/reading/synonym/${id}`,
   choice: (id) => `/reading/choice/${id}`,
   dictation: (id) => `/listening/dictation/${id}`,
+  listenchoice: (id) => `/listening/choice/${id}`,
   shadowing: (id) => `/speaking/shadowing/${id}`,
 };
 
@@ -154,20 +162,24 @@ export async function getRecentAttempts(limit = 6): Promise<RecentAttempt[]> {
   const labels = new Map<string, string>();
   const ids = (k: Kind) => [...(byKind.get(k) ?? new Set<number>())];
 
-  const [essays, paraphrases, synonyms, choices, dictations, shadowings] =
+  const [essays, paraphrases, errorfixes, synonyms, choices, dictations, listenchoices, shadowings] =
     await Promise.all([
       db.sampleEssay.findMany({ where: { id: { in: ids("copy") } } }),
       db.paraphraseExercise.findMany({ where: { id: { in: ids("paraphrase") } } }),
+      db.errorFix.findMany({ where: { id: { in: ids("errorfix") } } }),
       db.synonymExercise.findMany({ where: { id: { in: ids("synonym") } } }),
       db.paraphraseChoice.findMany({ where: { id: { in: ids("choice") } } }),
       db.dictationClip.findMany({ where: { id: { in: ids("dictation") } } }),
+      db.listenChoice.findMany({ where: { id: { in: ids("listenchoice") } } }),
       db.shadowingClip.findMany({ where: { id: { in: ids("shadowing") } } }),
     ]);
   for (const e of essays) labels.set(`copy:${e.id}`, e.title);
   for (const e of paraphrases) labels.set(`paraphrase:${e.id}`, clip(e.original));
+  for (const e of errorfixes) labels.set(`errorfix:${e.id}`, `Fix: ${e.mistake}`);
   for (const e of synonyms) labels.set(`synonym:${e.id}`, `“${e.targetWord}” in the passage`);
   for (const e of choices) labels.set(`choice:${e.id}`, clip(e.original));
   for (const e of dictations) labels.set(`dictation:${e.id}`, e.title);
+  for (const e of listenchoices) labels.set(`listenchoice:${e.id}`, e.title);
   for (const e of shadowings) labels.set(`shadowing:${e.id}`, clip(e.question));
 
   return attempts.map((a) => {
@@ -198,20 +210,24 @@ export interface NextUp {
 /** For each module, the first exercise not yet attempted. */
 export async function getNextUp(): Promise<NextUp[]> {
   const [
-    essays, paraphrases, synonyms, choices, dictations, shadowings,
-    doneCopy, donePara, doneSyn, doneChoice, doneDict, doneShad,
+    essays, paraphrases, errorfixes, synonyms, choices, dictations, listenchoices, shadowings,
+    doneCopy, donePara, doneErr, doneSyn, doneChoice, doneDict, doneLC, doneShad,
   ] = await Promise.all([
     db.sampleEssay.findMany({ orderBy: { id: "asc" } }),
     db.paraphraseExercise.findMany({ orderBy: { id: "asc" } }),
+    db.errorFix.findMany({ orderBy: { id: "asc" } }),
     db.synonymExercise.findMany({ orderBy: { id: "asc" } }),
     db.paraphraseChoice.findMany({ orderBy: { id: "asc" } }),
     db.dictationClip.findMany({ orderBy: { id: "asc" } }),
+    db.listenChoice.findMany({ orderBy: { id: "asc" } }),
     db.shadowingClip.findMany({ orderBy: { id: "asc" } }),
     getDoneRefIds("copy"),
     getDoneRefIds("paraphrase"),
+    getDoneRefIds("errorfix"),
     getDoneRefIds("synonym"),
     getDoneRefIds("choice"),
     getDoneRefIds("dictation"),
+    getDoneRefIds("listenchoice"),
     getDoneRefIds("shadowing"),
   ]);
 
@@ -222,9 +238,11 @@ export async function getNextUp(): Promise<NextUp[]> {
   }[] = [
     { kind: "copy", done: doneCopy, items: essays.map((e) => ({ id: e.id, label: e.title })) },
     { kind: "paraphrase", done: donePara, items: paraphrases.map((e) => ({ id: e.id, label: clip(e.original) })) },
+    { kind: "errorfix", done: doneErr, items: errorfixes.map((e) => ({ id: e.id, label: `Fix: ${e.mistake}` })) },
     { kind: "synonym", done: doneSyn, items: synonyms.map((e) => ({ id: e.id, label: `“${e.targetWord}” in the passage` })) },
     { kind: "choice", done: doneChoice, items: choices.map((e) => ({ id: e.id, label: clip(e.original) })) },
     { kind: "dictation", done: doneDict, items: dictations.map((e) => ({ id: e.id, label: e.title })) },
+    { kind: "listenchoice", done: doneLC, items: listenchoices.map((e) => ({ id: e.id, label: e.title })) },
     { kind: "shadowing", done: doneShad, items: shadowings.map((e) => ({ id: e.id, label: clip(e.question) })) },
   ];
 
@@ -287,8 +305,10 @@ export async function getKindStats(kind: Kind, total: number) {
 export const KIND_NOUN: Record<Kind, string> = {
   copy: "essay copy",
   paraphrase: "paraphrase",
+  errorfix: "mistake fix",
   synonym: "synonym",
   choice: "paraphrase choice",
   dictation: "dictation",
+  listenchoice: "listen & choose",
   shadowing: "shadowing",
 };

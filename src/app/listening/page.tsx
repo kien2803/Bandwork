@@ -4,9 +4,11 @@ import { Panel, PanelTitle } from "@/components/panel";
 import { ExerciseRow } from "@/components/exercise-list";
 
 export default async function ListeningPage() {
-  const [clips, scores] = await Promise.all([
+  const [clips, choices, scores, choiceScores] = await Promise.all([
     db.dictationClip.findMany({ orderBy: { id: "asc" } }),
+    db.listenChoice.findMany({ orderBy: { id: "asc" } }),
     getLatestScores("dictation"),
+    getLatestScores("listenchoice"),
   ]);
   const stats = await getKindStats("dictation", clips.length);
 
@@ -19,24 +21,45 @@ export default async function ListeningPage() {
       </p>
 
       <div className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-        <Panel>
-          <PanelTitle>Dictation clips</PanelTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Play, type what you hear, then compare with the transcript.
-          </p>
-          <div className="mt-4 flex flex-col gap-2">
-            {clips.map((c) => (
-              <ExerciseRow
-                key={c.id}
-                href={`/listening/dictation/${c.id}`}
-                title={c.title}
-                meta={`Level ${c.level} · one sentence`}
-                done={scores.has(c.id)}
-                score={scores.get(c.id)}
-              />
-            ))}
-          </div>
-        </Panel>
+        <div className="flex flex-col gap-4">
+          <Panel>
+            <PanelTitle>Dictation clips</PanelTitle>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Play, type what you hear, then compare with the transcript.
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              {clips.map((c) => (
+                <ExerciseRow
+                  key={c.id}
+                  href={`/listening/dictation/${c.id}`}
+                  title={c.title}
+                  meta={`Level ${c.level} · one sentence`}
+                  done={scores.has(c.id)}
+                  score={scores.get(c.id)}
+                />
+              ))}
+            </div>
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Listen &amp; choose</PanelTitle>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Hear a sentence, pick the option that keeps its meaning.
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              {choices.map((c) => (
+                <ExerciseRow
+                  key={c.id}
+                  href={`/listening/choice/${c.id}`}
+                  title={c.title}
+                  meta="one sentence · three options"
+                  done={choiceScores.has(c.id)}
+                  score={choiceScores.get(c.id)}
+                />
+              ))}
+            </div>
+          </Panel>
+        </div>
 
         <div className="flex flex-col gap-4">
           <Panel>

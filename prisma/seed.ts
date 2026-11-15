@@ -103,6 +103,11 @@ const paraphrases = [
       "Public transport use has risen sharply in the last ten years.",
       "There has been a dramatic growth in the number of commuters on public transport during the past decade.",
     ],
+    tips: [
+      "Compress 'the number of people using' into a noun phrase: 'public transport use' or 'ridership'.",
+      "'Increased dramatically' can become 'risen sharply', 'soared', or the noun 'a dramatic growth'.",
+      "Vary the time phrase too: 'in the last ten years' instead of 'over the past decade'.",
+    ],
   },
   {
     original:
@@ -110,6 +115,11 @@ const paraphrases = [
     models: [
       "A lot of children devote excessive time to video games, and this may harm their academic performance.",
       "Spending long hours on computer games can negatively influence how well many children do at school.",
+    ],
+    tips: [
+      "'Spend too much time' upgrades to 'devote excessive time to' or 'spend long hours on'.",
+      "'School work' becomes 'academic performance' or 'their studies' in formal writing.",
+      "Try starting with the gerund: 'Spending long hours on…' instead of 'Many children spend…'.",
     ],
   },
   {
@@ -119,6 +129,11 @@ const paraphrases = [
       "Human actions, particularly the burning of fossil fuels, are the primary cause of climate change.",
       "The main driver of rising global temperatures is human activity, including the use of fossil fuels.",
     ],
+    tips: [
+      "Flip the passive: 'Human activities… are the primary cause of global warming.'",
+      "'Global warming' has strong synonyms: 'climate change', 'rising global temperatures'.",
+      "'Such as' tightens to 'particularly' or 'including'.",
+    ],
   },
   {
     original:
@@ -126,6 +141,11 @@ const paraphrases = [
     models: [
       "Thanks to its flexibility and low cost, studying online is growing in popularity.",
       "More and more people choose online courses since they can study when they want at a reasonable price.",
+    ],
+    tips: [
+      "Move the reason to the front: 'Thanks to its flexibility and low cost…'.",
+      "'Has become increasingly popular' → 'is growing in popularity' or 'more and more people choose'.",
+      "Unpack the adjectives: 'flexible' → 'study when they want'; 'affordable' → 'at a reasonable price'.",
     ],
   },
   {
@@ -135,6 +155,11 @@ const paraphrases = [
       "In recent years, urban air quality has deteriorated to a point where it threatens public health.",
       "Large cities have recently experienced alarmingly high levels of air pollution.",
     ],
+    tips: [
+      "'Air pollution in large cities' compresses to 'urban air quality', which lets you recast the clause.",
+      "'Reached dangerous levels' → 'deteriorated to a point where it threatens public health'.",
+      "Open with the time phrase: 'In recent years, …' shifts the rhythm immediately.",
+    ],
   },
   {
     original:
@@ -142,6 +167,37 @@ const paraphrases = [
     models: [
       "Compared with earlier generations, today's youth are under greater pressure to achieve success.",
       "The pressure to do well in life is heavier for young people now than it was for their parents and grandparents.",
+    ],
+    tips: [
+      "'Young people today' → 'today's youth' or 'younger generations'.",
+      "'Face more pressure' → 'are under greater pressure'; or make 'pressure' the subject.",
+      "Name the comparison: 'their parents and grandparents' instead of 'previous generations'.",
+    ],
+  },
+  {
+    original:
+      "Some people believe that advertising encourages us to buy things we do not really need. They argue that adverts create artificial desires by making products seem more attractive than they actually are.",
+    models: [
+      "It is argued that advertising pushes consumers towards unnecessary purchases, as commercials tend to manufacture wants by presenting goods in an unrealistically appealing light.",
+      "Critics of advertising claim it persuades people to acquire items they could live without, because adverts generate false needs and exaggerate a product's appeal.",
+    ],
+    tips: [
+      "Merge or reorder the two sentences: one clause with 'as'/'because' reads differently from the original.",
+      "'Encourages us to buy' → 'pushes consumers towards purchasing' or 'persuades people to acquire'.",
+      "'Things we do not really need' → 'unnecessary purchases' or 'items they could live without'.",
+    ],
+  },
+  {
+    original:
+      "Studying abroad gives students the chance to experience a different culture and improve their language skills. However, it can also be expensive and many students feel homesick during their first months away.",
+    models: [
+      "Although living overseas for education lets students immerse themselves in another culture and sharpen their language ability, the high costs and initial homesickness affect many of them.",
+      "While overseas study offers cultural immersion and better language proficiency, it is often costly, and a lot of students struggle with missing home at first.",
+    ],
+    tips: [
+      "Join the contrast in one sentence: lead with 'Although' or 'While' instead of a separate 'However' sentence.",
+      "'Experience a different culture' → 'cultural immersion' or 'immerse themselves in another culture'.",
+      "'Feel homesick' → 'struggle with missing home' or 'suffer from homesickness'.",
     ],
   },
 ];
@@ -374,20 +430,168 @@ const shadowing = [
   },
 ];
 
+const errorFixes = [
+  {
+    mistake: "word repetition",
+    flawed:
+      "Nowadays, technology is very important in our lives. Technology helps us do many things faster, and technology also connects people around the world.",
+    corrected:
+      "Nowadays, technology is very important in our lives. It helps us do many things faster, and it also connects people around the world.",
+    explanation:
+      "Repeating the same noun signals limited lexical range. Use pronouns ('it') or synonyms ('these tools', 'such devices') to vary reference.",
+  },
+  {
+    mistake: "basic vocabulary",
+    flawed:
+      "Pollution is a big problem and the government should do more things to stop it.",
+    corrected:
+      "Pollution is a serious problem, and the government should take stronger measures to tackle it.",
+    explanation:
+      "'Big', 'things' and 'do' are too vague for IELTS. Upgrade to precise words: 'serious/significant', 'measures/steps', 'tackle/address'.",
+  },
+  {
+    mistake: "simple sentence chains",
+    flawed:
+      "Many people work from home. It saves time. It is also more comfortable.",
+    corrected:
+      "Many people work from home because it saves time and is also more comfortable.",
+    explanation:
+      "Short simple sentences in a row keep grammar range low. Join ideas with 'because', 'which', 'while' or 'although' to build complex sentences.",
+  },
+  {
+    mistake: "subject–verb agreement",
+    flawed:
+      "The number of students choosing online courses have increased a lot in recent years.",
+    corrected:
+      "The number of students choosing online courses has increased considerably in recent years.",
+    explanation:
+      "The subject is 'the number' (singular), not 'students': 'the number of… has', but 'a number of students have'. 'A lot' → 'considerably'.",
+  },
+  {
+    mistake: "articles",
+    flawed:
+      "The pollution in big cities is getting worse, and the people need to use the public transport more.",
+    corrected:
+      "Pollution in big cities is getting worse, and people need to use public transport more.",
+    explanation:
+      "Generic plural and uncountable nouns take no article: 'pollution', 'people', 'public transport'. Keep 'the' for specific references.",
+  },
+  {
+    mistake: "word form",
+    flawed:
+      "Online learning is more convenience than traditional classes, and it is also more cheap.",
+    corrected:
+      "Online learning is more convenient than traditional classes, and it is also cheaper.",
+    explanation:
+      "'Convenience' is a noun; the adjective is 'convenient'. 'Cheap' is a short adjective, so its comparative is 'cheaper', not 'more cheap'.",
+  },
+  {
+    mistake: "double comparative",
+    flawed:
+      "Living in the countryside is more healthier than living in a busy city.",
+    corrected:
+      "Living in the countryside is healthier than living in a busy city.",
+    explanation:
+      "Never combine 'more' with an -er comparative: 'more healthier' → 'healthier' (or 'much healthier' for emphasis).",
+  },
+  {
+    mistake: "overgeneralisation",
+    flawed:
+      "All young people prefer studying online because nobody likes going to school.",
+    corrected:
+      "Many young people prefer studying online, partly because some find classrooms restrictive.",
+    explanation:
+      "'All' and 'nobody' are impossible to prove and examiners penalise absolute claims. Soften with 'many', 'some', 'tend to', 'partly'.",
+  },
+];
+
+const listenChoices = [
+  {
+    title: "Remote work",
+    audio:
+      "Working from home saves employees a significant amount of commuting time.",
+    options: [
+      "Employees working remotely spend much less time travelling to work.",
+      "Remote employees commute more quickly than office staff.",
+      "Commuting time is the main reason people choose to work from home.",
+    ],
+    correct: 0,
+  },
+  {
+    title: "City transport",
+    audio:
+      "The city introduced cheaper bus fares to encourage people to leave their cars at home.",
+    options: [
+      "Bus fares were cut so that drivers would switch to public transport.",
+      "The city forced people to stop driving by raising bus fares.",
+      "Cheaper cars persuaded commuters to take the bus instead.",
+    ],
+    correct: 0,
+  },
+  {
+    title: "Reading habits",
+    audio:
+      "Fewer young people read printed books than a decade ago, although overall reading has not declined.",
+    options: [
+      "Young people read less in total than they did ten years ago.",
+      "Print reading among the young has fallen, but total reading is stable.",
+      "Printed books are no longer read by anyone under a certain age.",
+    ],
+    correct: 1,
+  },
+  {
+    title: "Exercise and health",
+    audio:
+      "Regular physical activity reduces the risk of heart disease even when it does not lead to weight loss.",
+    options: [
+      "Exercise only protects the heart if it makes you lose weight.",
+      "Weight loss is the best way to avoid heart disease.",
+      "Exercising regularly can protect the heart regardless of weight change.",
+    ],
+    correct: 2,
+  },
+  {
+    title: "Water scarcity",
+    audio:
+      "Unless rainfall patterns change, the region will face severe water shortages within twenty years.",
+    options: [
+      "The region already suffers from severe water shortages.",
+      "Severe water shortages are likely in two decades if rainfall stays the same.",
+      "Changing rainfall patterns will end water shortages in twenty years.",
+    ],
+    correct: 1,
+  },
+  {
+    title: "Sleep and study",
+    audio:
+      "Teenagers who sleep fewer than seven hours tend to perform worse at school, even if they study more.",
+    options: [
+      "Studying more helps teenagers do well at school despite little sleep.",
+      "Extra study does not make up for the harm of short sleep in school results.",
+      "Teenagers who study the hardest sleep the fewest hours.",
+    ],
+    correct: 1,
+  },
+];
+
 async function main() {
   await db.attempt.deleteMany();
   await db.sampleEssay.deleteMany();
   await db.paraphraseExercise.deleteMany();
   await db.synonymExercise.deleteMany();
   await db.paraphraseChoice.deleteMany();
+  await db.errorFix.deleteMany();
+  await db.listenChoice.deleteMany();
   await db.dictationClip.deleteMany();
   await db.shadowingClip.deleteMany();
   await db.$executeRawUnsafe("DELETE FROM sqlite_sequence");
 
   await db.sampleEssay.createMany({ data: essays });
-  await db.paraphraseExercise.createMany({ data: paraphrases.map((p) => ({ ...p, models: JSON.stringify(p.models) })) });
+  await db.paraphraseExercise.createMany({ data: paraphrases.map((p) => ({ ...p, models: JSON.stringify(p.models), tips: JSON.stringify(p.tips) })) });
   await db.synonymExercise.createMany({ data: synonyms });
   await db.paraphraseChoice.createMany({ data: choices.map((c) => ({ ...c, options: JSON.stringify(c.options) })) });
+  await db.errorFix.createMany({ data: errorFixes });
+  await db.listenChoice.createMany({ data: listenChoices.map((c) => ({ ...c, options: JSON.stringify(c.options) })) });
   await db.dictationClip.createMany({ data: dictations });
   await db.shadowingClip.createMany({ data: shadowing });
 
@@ -396,6 +600,8 @@ async function main() {
     db.paraphraseExercise.count(),
     db.synonymExercise.count(),
     db.paraphraseChoice.count(),
+    db.errorFix.count(),
+    db.listenChoice.count(),
     db.dictationClip.count(),
     db.shadowingClip.count(),
   ]);
@@ -404,8 +610,10 @@ async function main() {
     paraphrases: counts[1],
     synonyms: counts[2],
     choices: counts[3],
-    dictations: counts[4],
-    shadowing: counts[5],
+    errorFixes: counts[4],
+    listenChoices: counts[5],
+    dictations: counts[6],
+    shadowing: counts[7],
   });
 }
 

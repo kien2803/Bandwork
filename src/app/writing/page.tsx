@@ -4,12 +4,15 @@ import { Panel, PanelTitle } from "@/components/panel";
 import { ExerciseRow } from "@/components/exercise-list";
 
 export default async function WritingPage() {
-  const [essays, paraphrases, copyScores, paraScores] = await Promise.all([
-    db.sampleEssay.findMany({ orderBy: { id: "asc" } }),
-    db.paraphraseExercise.findMany({ orderBy: { id: "asc" } }),
-    getLatestScores("copy"),
-    getLatestScores("paraphrase"),
-  ]);
+  const [essays, paraphrases, fixes, copyScores, paraScores, fixScores] =
+    await Promise.all([
+      db.sampleEssay.findMany({ orderBy: { id: "asc" } }),
+      db.paraphraseExercise.findMany({ orderBy: { id: "asc" } }),
+      db.errorFix.findMany({ orderBy: { id: "asc" } }),
+      getLatestScores("copy"),
+      getLatestScores("paraphrase"),
+      getLatestScores("errorfix"),
+    ]);
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 pb-10 pt-6 md:px-6 md:pt-8">
@@ -52,6 +55,26 @@ export default async function WritingPage() {
                 meta={`Exercise ${i + 1} of ${paraphrases.length}`}
                 done={paraScores.has(p.id)}
                 score={paraScores.get(p.id)}
+              />
+            ))}
+          </div>
+        </Panel>
+
+        <Panel className="lg:col-span-2">
+          <PanelTitle>Fix common mistakes</PanelTitle>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Each sentence hides a typical band-5 mistake. Rewrite it, then read
+            why.
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {fixes.map((f) => (
+              <ExerciseRow
+                key={f.id}
+                href={`/writing/mistakes/${f.id}`}
+                title={f.mistake}
+                meta={f.flawed.length > 56 ? `${f.flawed.slice(0, 56).trimEnd()}…` : f.flawed}
+                done={fixScores.has(f.id)}
+                score={fixScores.get(f.id)}
               />
             ))}
           </div>

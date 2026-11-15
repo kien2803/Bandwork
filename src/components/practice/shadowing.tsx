@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   Eye,
@@ -25,17 +25,38 @@ export interface ShadowingData {
 
 type RecState = "idle" | "recording" | "recorded";
 
+const CRITERIA = [
+  { key: "fluency", label: "Fluency", hint: "smooth, few hesitations" },
+  { key: "pronunciation", label: "Pronunciation", hint: "clear sounds and stress" },
+  { key: "lexical", label: "Lexical resource", hint: "varied, precise words" },
+  { key: "grammar", label: "Grammar", hint: "accurate structures" },
+] as const;
+type CriterionKey = (typeof CRITERIA)[number]["key"];
+const LEVELS = ["Needs work", "Getting there", "Confident"];
+
 export function ShadowingPractice({ clip }: { clip: ShadowingData }) {
   const [playing, setPlaying] = useState(false);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
   const [showText, setShowText] = useState(true);
   const [recState, setRecState] = useState<RecState>("idle");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [micError, setMicError] = useState<string | null>(null);
+  const [ratings, setRatings] = useState<Partial<Record<CriterionKey, number>>>({});
   const [done, setDone] = useState(false);
   const [supported, setSupported] = useState(true);
   const recRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+
+  const sentences = useMemo(
+    () =>
+      clip.transcript
+        .match(/[^.!?]+[.!?]+["'’]?/g)
+        ?.map((s) => s.trim()) ?? [clip.transcript],
+    [clip.transcript],
+  );
+
+  const allRated = CRITERIA.every((c) => ratings[c.key] != null);
 
   useEffect(() => {
     setSupported(speechSupported());
@@ -56,6 +77,17 @@ export function ShadowingPractice({ clip }: { clip: ShadowingData }) {
     setPlaying(true);
     await speak(clip.transcript, 0.92);
     setPlaying(false);
+  }
+
+  async function playSentence(i: number) {
+    if (playingIdx === i) {
+      stopSpeaking();
+      setPlayingIdx(null);
+      return;
+    }
+    setPlayingIdx(i);
+    await speak(sentences[i], 0.92);
+    setPlayingIdx((cur) => (cur === i ? null : cur));
   }
 
   async function startRecording() {
@@ -98,13 +130,21 @@ export function ShadowingPractice({ clip }: { clip: ShadowingData }) {
     setRecState("idle");
   }
 
-  function markDone() {
+  function saveCheck(withAssessment: boolean) {
     setDone(true);
+    const vals = CRITERIA.map((c) => ratings[c.key] ?? 0);
     recordAttempt({
       module: "speaking",
       kind: "shadowing",
       refId: clip.id,
-      detail: { recorded: recState === "recorded" },
+      score:
+        withAssessment && allRated
+          ? Math.round((vals.reduce((a, b) => a + b, 0) / (4 * 3)) * 100)
+          : undefined,
+      detail: {
+        recorded: recState === "recorded",
+        assessment: withAssessment && allRated ? ratings : undefined,
+      },
     });
   }
 
@@ -143,6 +183,46 @@ export function ShadowingPractice({ clip }: { clip: ShadowingData }) {
             Hidden. Listen and speak along.
           </p>
         )}
+
+        {sentences.length > 1 && (
+          <div className="mt-4 border-t border-rule pt-3">
+            <p className="text-[13px] font-medium text-foreground">
+              Sentence by sentence
+            </p>
+            <div className="mt-2 flex flex-col gap-1">
+              {sentences.map((s, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <button
+                    onClick={() => playSentence(i)}
+                    disabled={!supported}
+                    aria-label={`Play sentence ${i + 1}`}
+                    className={cn(
+                      "mt-1 flex size-6 shrink-0 items-center justify-center rounded-full border transition-colors",
+                      playingIdx === i
+                        ? "border-teal bg-teal text-white"
+                        : "border-input text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {playingIdx === i ? <Square size={10} /> : <Play size={11} />}
+                  </button>
+                  <span
+                    className={cn(
+                      "text-sm leading-7 text-foreground",
+                      !showText && "text-muted-foreground",
+                    )}
+                  >
+                    {showText ? s : `Sentence ${i + 1}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[13px] leading-5 text-muted-foreground">
+              Play one model sentence, replay your recording, and compare the
+              rhythm of just that line.
+            </p>
+          </div>
+        )}
+
         <p className="mt-4 border-t border-rule pt-3 text-[13px] leading-5 text-muted-foreground">
           {supported
             ? "Shadowing: play the model and speak at almost the same time, copying the rhythm and stress, then record yourself."
@@ -186,27 +266,91 @@ export function ShadowingPractice({ clip }: { clip: ShadowingData }) {
           {audioUrl && (
             <audio controls src={audioUrl} className="mt-4 h-10 w-full" />
           )}
-          <p className="mt-4 border-t border-rule pt-3 text-[13px] leading-5 text-muted-foreground">
-            Replay both recordings and compare rhythm, linking and stress, not
-            just the words.
-          </p>
         </Panel>
 
-        <Panel className="flex items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
-            Finished shadowing this clip?
-          </p>
-          {done ? (
-            <span className="flex items-center gap-1.5 text-sm font-medium text-positive">
-              <Check size={15} />
-              Done
-            </span>
-          ) : (
-            <Button variant="secondary" onClick={markDone}>
-              Mark as done
-            </Button>
-          )}
-        </Panel>
+        {recState === "recorded" && (
+          <Panel>
+            <PanelTitle>Self-check</PanelTitle>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Replay your recording and rate each criterion honestly.
+            </p>
+            <div className="mt-3 flex flex-col gap-3">
+              {CRITERIA.map((c) => (
+                <div
+                  key={c.key}
+                  className="flex flex-wrap items-center justify-between gap-2"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      {c.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{c.hint}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    {LEVELS.map((level, i) => (
+                      <button
+                        key={level}
+                        onClick={() =>
+                          setRatings((r) => ({ ...r, [c.key]: i + 1 }))
+                        }
+                        className={cn(
+                          "rounded-full border px-3 py-1 text-xs transition-colors",
+                          ratings[c.key] === i + 1
+                            ? "border-teal bg-teal-soft text-teal"
+                            : "border-input text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex items-center gap-3 border-t border-rule pt-3">
+              {done ? (
+                <span className="flex items-center gap-1.5 text-sm font-medium text-positive">
+                  <Check size={15} />
+                  Saved
+                </span>
+              ) : (
+                <>
+                  <Button
+                    variant="secondary"
+                    onClick={() => saveCheck(true)}
+                    disabled={!allRated}
+                  >
+                    Save self-check
+                  </Button>
+                  <button
+                    onClick={() => saveCheck(false)}
+                    className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Skip rating
+                  </button>
+                </>
+              )}
+            </div>
+          </Panel>
+        )}
+
+        {recState !== "recorded" && (
+          <Panel className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              Finished shadowing this clip?
+            </p>
+            {done ? (
+              <span className="flex items-center gap-1.5 text-sm font-medium text-positive">
+                <Check size={15} />
+                Done
+              </span>
+            ) : (
+              <Button variant="secondary" onClick={() => saveCheck(false)}>
+                Mark as done
+              </Button>
+            )}
+          </Panel>
+        )}
       </div>
     </div>
   );
