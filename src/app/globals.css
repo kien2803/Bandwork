@@ -1,0 +1,115 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-instrument-sans), "Inter", system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--ring);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-accent-foreground: var(--foreground);
+  --color-sidebar-accent: var(--accent-soft);
+  --color-sidebar-primary-foreground: var(--primary-foreground);
+  --color-sidebar-primary: var(--primary);
+  --color-sidebar-foreground: var(--foreground);
+  --color-sidebar: var(--chrome);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--foreground);
+  --color-accent: var(--accent-soft);
+  --color-muted-foreground: var(--muted);
+  --color-muted: var(--panel);
+  --color-secondary-foreground: var(--foreground);
+  --color-secondary: var(--accent-soft);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--foreground);
+  --color-popover: var(--sheet);
+  --color-card-foreground: var(--foreground);
+  --color-card: var(--panel);
+  --color-chrome: var(--chrome);
+  --color-panel: var(--panel);
+  --color-rule: var(--rule);
+  --color-ink: var(--text);
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--pill-positive-bg);
+  --color-negative: var(--negative);
+  --color-negative-soft: var(--pill-negative-bg);
+  --color-warning-soft: var(--pill-warning-bg);
+  --color-warning: var(--warning);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+}
+
+:root {
+  /* Editorial greeting tokens — warm paper chrome, white sheet, tonal panels */
+  --chrome: #f6f5f3;
+  --sheet: #ffffff;
+  --panel: #f9f8f7;
+  --background: var(--sheet);
+  --foreground: #1f201d;
+  --text: #1f201d;
+  --muted: #636361;
+
+  --border: #e9e8e4;
+  --rule: #f2f1ee;
+  --input: #d8d6d0;
+
+  --teal: #1b6e66;
+  --teal-soft: #e3efec;
+  --primary: #1b6e66;
+  --primary-foreground: #ffffff;
+  --accent-soft: #efeeea;
+
+  --positive: #2e7d32;
+  --negative: #b42318;
+  --warning: #92400e;
+  --pill-positive-bg: #dcfae5;
+  --pill-positive-ink: #04250e;
+  --pill-negative-bg: #fdecea;
+  --pill-negative-ink: #7a1d14;
+  --pill-warning-bg: #fffbeb;
+  --pill-warning-ink: #92400e;
+
+  --ring: #1b6e66;
+  --chart-1: #1f201d;
+  --chart-2: #1b6e66;
+  --chart-3: #8c8c88;
+  --chart-4: #c9c7bd;
+  --chart-5: #5f5e58;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/40;
+  }
+  body {
+    @apply bg-chrome text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+}

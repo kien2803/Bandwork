@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- Exercise content -------------------------------------------------------
+
+model SampleEssay {
+  id         Int      @id @default(autoincrement())
+  task       String // "task1" | "task2"
+  title      String
+  prompt     String
+  content    String
+  band       Float    @default(7.0)
+  wordTarget Int      @default(250)
+  createdAt  DateTime @default(now())
+}
+
+model ParaphraseExercise {
+  id        Int      @id @default(autoincrement())
+  original  String
+  models    String // JSON array of model paraphrases
+  createdAt DateTime @default(now())
+}
+
+model SynonymExercise {
+  id          Int      @id @default(autoincrement())
+  passage     String // sentence from the reading passage
+  question    String // the question sentence that paraphrases it
+  targetWord  String // the word in the question to match
+  answerWord  String // the synonymous word in the passage
+  explanation String?
+  createdAt   DateTime @default(now())
+}
+
+model ParaphraseChoice {
+  id        Int      @id @default(autoincrement())
+  original  String
+  options   String // JSON array of 3 options
+  correct   Int
+  createdAt DateTime @default(now())
+}
+
+model DictationClip {
+  id         Int      @id @default(autoincrement())
+  title      String
+  transcript String
+  level      Int      @default(1)
+  createdAt  DateTime @default(now())
+}
+
+model ShadowingClip {
+  id         Int      @id @default(autoincrement())
+  part       Int // IELTS speaking part: 1, 2 or 3
+  question   String
+  transcript String
+  createdAt  DateTime @default(now())
+}
+
+// --- Progress ---------------------------------------------------------------
+// Polymorphic attempt log. `kind` identifies which exercise table `refId`
+// points at: "copy" | "paraphrase" | "synonym" | "choice" | "dictation" | "shadowing".
+
+model Attempt {
+  id        Int      @id @default(autoincrement())
+  module    String // "writing" | "reading" | "listening" | "speaking"
+  kind      String
+  refId     Int
+  score     Float? // 0-100 similarity for copy/dictation, 0|100 for right/wrong
+  detail    String? // JSON with extra data (user answer, etc.)
+  createdAt DateTime @default(now())
+
+  @@index([kind, refId])
+  @@index([module])
+  @@index([createdAt])
+}
