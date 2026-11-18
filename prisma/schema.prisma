@@ -97,3 +97,22 @@ model Attempt {
   @@index([module])
   @@index([createdAt])
 }
+
+// Personal error notebook. Entries are created automatically from attempt
+// results: failed error fixes, over-copied paraphrases, dropped function
+// words in copy/dictation, "needs work" self-checks in speaking.
+// `resolved` flips when the learner later nails the same category.
+
+model ErrorEntry {
+  id        Int      @id @default(autoincrement())
+  category  String // e.g. "articles", "word repetition", "speaking: fluency"
+  module    String
+  source    String // "kind:refId" for traceability back to the exercise
+  excerpt   String? // the flawed fragment or missed words
+  note      String? // what to do instead
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([category, resolved, createdAt])
+  @@index([createdAt])
+}

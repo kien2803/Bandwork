@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { logErrorsFromAttempt } from "@/lib/errors";
 
 export async function POST(req: Request) {
   let body: {
@@ -34,5 +35,17 @@ export async function POST(req: Request) {
       detail: detail === undefined ? null : JSON.stringify(detail).slice(0, 4000),
     },
   });
+
+  try {
+    await logErrorsFromAttempt(
+      attempt,
+      detail && typeof detail === "object"
+        ? (detail as Record<string, unknown>)
+        : null,
+    );
+  } catch {
+    // The notebook is derived data — never fail the attempt over it.
+  }
+
   return NextResponse.json(attempt, { status: 201 });
 }

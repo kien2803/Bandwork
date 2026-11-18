@@ -576,6 +576,7 @@ const listenChoices = [
 
 async function main() {
   await db.attempt.deleteMany();
+  await db.errorEntry.deleteMany();
   await db.sampleEssay.deleteMany();
   await db.paraphraseExercise.deleteMany();
   await db.synonymExercise.deleteMany();

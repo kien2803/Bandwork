@@ -9,6 +9,7 @@ import {
   House,
   Menu,
   Mic,
+  NotebookPen,
   PenLine,
   X,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/reading", label: "Reading", icon: BookOpen },
   { href: "/listening", label: "Listening", icon: Ear },
   { href: "/speaking", label: "Speaking", icon: Mic },
+  { href: "/notebook", label: "Notebook", icon: NotebookPen },
 ];
 
 function isActive(pathname: string, href: string) {

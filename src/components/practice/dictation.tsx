@@ -50,7 +50,13 @@ export function DictationPractice({ clip }: { clip: DictationData }) {
       kind: "dictation",
       refId: clip.id,
       score: r.accuracy,
-      detail: { plays },
+      detail: {
+        plays,
+        missing: r.segments
+          .filter((s) => s.type === "missing")
+          .map((s) => s.text)
+          .slice(0, 14),
+      },
     });
   }
 

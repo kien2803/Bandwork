@@ -38,7 +38,13 @@ export function CopyEssayPractice({ essay }: { essay: EssayData }) {
       kind: "copy",
       refId: essay.id,
       score: r.accuracy,
-      detail: { words },
+      detail: {
+        words,
+        missing: r.segments
+          .filter((s) => s.type === "missing")
+          .map((s) => s.text)
+          .slice(0, 14),
+      },
     });
   }
 
